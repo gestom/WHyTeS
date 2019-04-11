@@ -46,7 +46,7 @@ def get_domain(dataset, edges_of_cell, edges_of_big_cell):
     extended_shape_of_grid, uniform_histogram_bools = get_uniform_data(dataset[:, 0: -1], edges_of_cell, edges_of_big_cell)
     domain_coordinates, shift = get_coordinates(dataset[:, 0: -1], extended_shape_of_grid, uniform_histogram_bools)
     domain_sums = get_sums(dataset, extended_shape_of_grid, uniform_histogram_bools)
-    print(np.sum(dataset[:, -1]))
+    #print(np.sum(dataset[:, -1]))
     return np.float64(domain_coordinates)/np.array([100.0, 100000.0, 100000.0]) + shift, domain_sums
     
     

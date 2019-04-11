@@ -1,6 +1,7 @@
 from sklearn.mixture import GaussianMixture
 import transformation as tr
 import grid
+import fremen
 
 import matplotlib.pyplot as plt
 import scipy.stats as st
@@ -59,7 +60,7 @@ class Frequencies:
                     #for j in xrange(int(how_many - 1)):
                     for j in range(int(np.ceil(how_many - 1))):
                         new_training.append(copied_data)
-            print(np.shape(np.array(new_training)))
+            #print(np.shape(np.array(new_training)))
             training_data = np.r_[training_data, np.array(new_training)]
         return training_data
 
@@ -115,17 +116,20 @@ class Frequencies:
         return 1 - st.chi2.cdf(c_dist_x, len(C))
 
 
-    def transform_data(self, path):
+    def transform_data(self, path, for_fremen=False):
         gridded, target = grid.get_domain(np.loadtxt(path), self.edges_of_cell, self.edges_of_cell * 3)
         X = tr.create_X(gridded, self.structure)
-        return X, target
+        if for_fremen:
+            return X, target, gridded[:, 0]
+        else:
+            return X, target
 
 
     def rmse(self, path, plot_it=False):
         X, target = self.transform_data(path)
-        print(np.sum(target))
+        #print(np.sum(target))
         y = self.predict(X)
-        print(np.sum(y))
+        #print(np.sum(y))
         if plot_it:
             ll = len(target)
             plt.scatter(range(ll), target, color='b', marker="s", s=1, edgecolor="None")

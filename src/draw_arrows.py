@@ -1,8 +1,9 @@
 
 from sklearn.mixture import GaussianMixture
 import transformation as tr
-import frequencies as freq
-import probabilities as prob
+import transformation_with_dirs as tr_dir
+#import frequencies as freq
+#import probabilities as prob
 
 import matplotlib.pyplot as plt
 import scipy.stats as st
@@ -31,21 +32,24 @@ class DrawArrows:
         XYUVC = self._create_grid_model(time)
         grey_red = LinearSegmentedColormap('GreyRed', self.create_cmap())
         plt.quiver(XYUVC[:, 0], XYUVC[:, 1], XYUVC[:, 2], XYUVC[:, 3], XYUVC[:, 4], angles='xy', scale_units='xy', scale=1.0, cmap=grey_red)
+        #plt.quiver(XYUVC[:, 0], XYUVC[:, 1], XYUVC[:, 2], XYUVC[:, 3], angles='xy', scale_units='xy', scale=1.0)
         plt.title(str(hour) + ' hours, ' + str(minute) + ' minutes')
         plt.clim(-1.0, 1.0)
         clb = plt.colorbar()
         clb.ax.set_ylabel('decimal logarithm of predicted number of people', rotation=270)
         s = "{:04d}".format(counter)
-        plt.savefig('sipky/' + s + '.png', dpi=900)
+        plt.savefig('sipky/' + s + '.png', dpi=200)
         plt.close()
 
 
     def _create_grid_model(self, time):
         table = self._create_coords(time)
-        table[4] = np.cos(table[3])
-        table[3] = np.sin(table[3])
-        table[5] = self.freqs.predict(tr.create_X(table.values, self.freqs.structure))
-        table[6] = self.probs.predict(tr.create_X(table.values, self.probs.structure))
+        all_freqs = self.freqs.predict(tr.create_X(table.values, self.freqs.structure))
+        all_dirs = self.probs.predict(tr_dir.create_X(table.values, self.probs.structure))
+        table[4] = np.sin(table[3])
+        table[3] = np.cos(table[3])
+        table[5] = all_freqs
+        table[6] = all_dirs
         a = table.groupby([1, 2]).apply(self._UVC_max).rename(columns={0:3, 1:4, 2:5})
         #a = table.groupby([1, 2]).apply(self._UVC_mean).rename(columns={0:3, 1:4, 2:5})
         a.reset_index(inplace=True)
@@ -53,8 +57,8 @@ class DrawArrows:
 
 
     def _create_coords(self, time):
-        X = np.arange(-8.0, 24.0, self.edges_of_cell[1])
-        Y = np.arange(-6.0, 17.0, self.edges_of_cell[2])
+        X = np.arange(-7.0, 13.0, self.edges_of_cell[1])
+        Y = np.arange(-7.0, 13.0, self.edges_of_cell[2])
         angles = np.arange(-np.pi, np.pi, np.pi/36.0)
         coords = self._cartesian_product(np.array([time]), X, Y, angles)
         return pd.DataFrame(coords)
@@ -86,6 +90,14 @@ class DrawArrows:
         xyw[0] = xyw[0] * xyw[3]
         xyw[1] = xyw[1] * xyw[3]
         xyw[2] = np.log10(xyw[2])
+        #if np.isnan(xyw[2]) or xyw[2] <= 0.1:
+        #    xyw[2] = 0.0
+        #elif xyw[2] >= 10:
+        #    xyw[2] = 1.0
+        #else:
+        #    xyw[2] = (np.log10(xyw[2]) + 1.0) / 2.0
+        #xyw[0] = xyw[0] * xyw[2] * xyw[3]
+        #xyw[1] = xyw[1] * xyw[2] * xyw[3]
         #return xyw
         return xyw.iloc[:3]
 

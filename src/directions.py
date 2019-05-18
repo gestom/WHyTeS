@@ -1,5 +1,6 @@
 from sklearn.mixture import GaussianMixture
 import transformation_with_dirs as tr
+import grid_with_directions as grid
 
 import matplotlib.pyplot as plt
 import scipy.stats as st
@@ -46,19 +47,27 @@ class Directions:
 
 
     def __init__(self, clusters=3,
+                 #edges_of_cell = np.array([1200.0, 0.5, 0.5]),  # ! pridano pro testovani
                  structure=[4, [1.0, 1.0], [86400.0, 604800.0]],
                  train_path = '../data/two_weeks_days_nights_weekends_with_dirs.txt'):
         self.clusters = clusters
+        #self.edges_of_cell = edges_of_cell  # ! pridano pro testovani
         self.structure = structure
         self.C_1, self.Pi_1, self.PREC_1 = self._create_model(1, train_path)
         self.C_0, self.Pi_0, self.PREC_0 = self._create_model(0, train_path)
+        #self.C_1, self.Pi_1, self.PREC_1 = self._create_model_freq(1, train_path)
+        #self.C_0, self.Pi_0, self.PREC_0 = self._create_model_freq(0, train_path)
 
 
-    def transform_data(self, path):
+    def transform_data(self, path, for_fremen=False):
         dataset=np.loadtxt(path)
         X = tr.create_X(dataset[:, : -1], self.structure)
         target = dataset[:, -1]
-        return X, target
+        if for_fremen:
+            return X, target, dataset[:, 0]
+        else:
+            return X, target
+        #return X, target
 
 
     def _create_model(self, condition, path):
@@ -199,4 +208,42 @@ class Directions:
         xyw[1] = xyw[1] * xyw[2]
         xyw[2] = self._entropy(group[5])
         return xyw
+
+
+
+    #def _create_model_freq(self, condition, path):
+    #    C, U, PREC = self._get_params(path, condition)
+    #    F = self._calibration(path, C, U, PREC)
+    #    return C, F, PREC
+
+
+    #def _get_params(self, path, condition):
+    #    X = self._projection(path, condition)
+    #    #X = tr.create_X(self._get_data(path), self.structure)
+    #    clf = GaussianMixture(n_components=self.clusters, max_iter=500).fit(X)
+    #    labels = clf.predict(X)
+    #    PREC = self._recalculate_precisions(X, labels)
+    #    U = clf.predict_proba(X)
+    #    C = clf.means_
+    #    return C, U.T, PREC
+
+
+    #def _calibration(self, path, C, U, PREC):
+    #    DOMAIN = tr.create_X(grid.get_domain(np.loadtxt(path), self.edges_of_cell, self.edges_of_cell * 3)[0], self.structure)
+    #    F = []
+    #    for idx in xrange(self.clusters):
+    #        weights = self._prob_of_belong(DOMAIN, C[idx], PREC[idx])
+    #        with np.errstate(divide='raise'):
+    #            try:
+    #                density = np.sum(U[idx]) / np.sum(weights)
+    #            except FloatingPointError:
+    #                print('vahy se souctem 0 nebo nevim')
+    #                print('np.sum(weights))')
+    #                print(np.sum(weights))
+    #                print('np.sum(U[cluster]))')
+    #                print(np.sum(U[idx]))
+    #                density = 0
+    #        F.append(density)
+    #    F = np.array(F)
+    #    return F  #, heights
 

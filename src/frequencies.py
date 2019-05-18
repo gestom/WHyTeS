@@ -1,7 +1,10 @@
 from sklearn.mixture import GaussianMixture
 import transformation as tr
 import grid
-import fremen
+#import fremen
+#import transformation_with_dirs as tr
+#import grid_with_directions as grid
+
 
 import matplotlib.pyplot as plt
 import scipy.stats as st
@@ -117,8 +120,12 @@ class Frequencies:
 
 
     def transform_data(self, path, for_fremen=False):
-        gridded, target = grid.get_domain(np.loadtxt(path), self.edges_of_cell, self.edges_of_cell * 3)
-        X = tr.create_X(gridded, self.structure)
+        #gridded, target = grid.get_domain(np.loadtxt(path), self.edges_of_cell, self.edges_of_cell)
+        #X = tr.create_X(gridded, self.structure)
+        ##############################################
+        # not working with fremen, need to rewrite !!!!
+        X = tr.create_X(np.loadtxt(path)[:, : -1], self.structure)
+        target = np.loadtxt(path)[:, -1]
         if for_fremen:
             return X, target, gridded[:, 0]
         else:

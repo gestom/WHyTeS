@@ -43,7 +43,9 @@ class Fremen():
         periodicities you think are the most influential)
     """
     def __init__(self, #data_path='../data/two_weeks_days_nights_weekends.txt', 
+                 structure,
                  minutes=0, hours=24, days=14, weeks=0):
+        self.used = set(structure[2])
         #self.path = data_path
         self.Ps, self.W_parted = self._build_frequencies(minutes, hours, days, weeks)
         #self.T, self.values = self._create_time_series()
@@ -213,24 +215,45 @@ class Fremen():
         """
         if minutes > 0:
             p_minutes = ((np.arange(minutes - 1) + 1.0) * 60.0)
+            use_now = []
+            for val in p_minutes:
+                if val not in self.used:
+                    use_now.append(val)
+            p_minutes = np.array(use_now)
             w_minutes = 1.0 / p_minutes
         else:
             p_minutes = np.array([])
             w_minutes = np.array([])
         if hours > 0:
             p_hours = ((np.arange(hours - 1) + 1.0) * 3600.0)
+            use_now = []
+            for val in p_hours:
+                if val not in self.used:
+                    use_now.append(val)
+            p_hours = np.array(use_now)
+            
             w_hours = 1.0 / p_hours
         else:
             p_hours = np.array([])
             w_hours = np.array([])
         if days > 0:
             p_days = ((np.arange(days - 1) + 1.0) * 86400.0)
+            use_now = []
+            for val in p_days:
+                if val not in self.used:
+                    use_now.append(val)
+            p_days = np.array(use_now)
             w_days = 1.0 / p_days
         else:
             p_days = np.array([])
             w_days = np.array([])
         if weeks > 0:
             p_weeks = ((np.arange(weeks - 1) + 1.0) * 604800.0)
+            use_now = []
+            for val in p_weeks:
+                if val not in self.used:
+                    use_now.append(val)
+            p_weeks = np.array(use_now)
             w_weeks = 1.0 / p_weeks
         else:
             p_weeks = np.array([])
@@ -238,6 +261,7 @@ class Fremen():
         #zero = np.array([0])
         Ps = np.r_[p_minutes, p_hours, p_days, p_weeks]
         W_parts = (w_minutes, w_hours, w_days, w_weeks)
+        #print(Ps)
         return Ps, W_parts
 
 
